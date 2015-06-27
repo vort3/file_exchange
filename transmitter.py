@@ -1,11 +1,11 @@
 import socket
-import os
 import Tkinter as tk
 import tkFileDialog
 
 
 KB = 1024
 MB = 1024 * KB
+filebuffer = 4 * KB
 
 # host = '78.132.190.8'
 host = 'vort3.ddns.net'
@@ -32,34 +32,40 @@ def pull_and_push(e=None):
     sock.send(input*4)
     return input
 
+def getsize(path):
+    with file(path) as f:
+        f.seek(0, 2)
+        return f.tell()
+
+
 sock = socket.socket()
 sock.connect_ex((host, 25565))
-
 print "connected to", host
 
 root = tk.Tk()
 root.withdraw()
-file = tkFileDialog.askopenfilename()
-size = os.path.getsize(file)
+filename = tkFileDialog.askopenfilename()
 
+size = getsize(filename)
 push_and_pull(size)
 print 'size confirmed', size
 
-with open(file, 'rb', 4*MB) as obj:
-    s = 0
+with open(filename, 'rb', filebuffer) as obj:
     c = 0
-    for part in obj.readlines():
+    part = obj.read(filebuffer)
+    s = len(part)
+    while part != "":
         c += 1
         sock.send(part)
-        s += part.__sizeof__()
         percents = (s*100)/(size)
-        if c % 500 == 0:
+        if c % 100 == 0:
             print "Current:", s, "\t\tExpected:", 
             print size, '\t', percents, '%'
-    sock.send("END_OF_FILE"*16)
+        part = obj.read(filebuffer)
+        s += len(part)
+
 
 print "sent"
-
 pull_and_push(size)
 print "file size confirmed"
 
