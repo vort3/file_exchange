@@ -9,4 +9,5 @@ ToDoLiSt:
 - Add GUI for typing IP.
 - Merge into single script.
 - Add GUI option to choose if user wants to receive or transmit files.
+- Send file name and use it to receive file. 
 
